@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="ida-auth-api-main">
+        <http:listener config-ref="ida-auth-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="ida-auth-api-config" />
+		<error-handler ref="api-kit-error-handler" />
+    </flow>
+    <flow name="ida-auth-apiFlow" doc:id="d26b721f-5742-4a41-ba1c-bb961962a838" >
+		<http:listener doc:name="Listener" doc:id="5e4e785f-a1e0-49da-97d1-05158bfceea0" config-ref="ida-auth-api-httpListenerConfig" path="/token"/>
+		<ee:transform doc:name="Transform Message" doc:id="5bfd643c-2bf3-40df-b9ef-c6e4537512be" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="ida-auth-api-console">
+        <http:listener config-ref="ida-auth-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="ida-auth-api-config" />
+		<error-handler ref="api-kit-error-handler" />
+    </flow>
+    <flow name="get:\validate-token:ida-auth-api-config">
+		<flow-ref doc:name="validate-token-orchestrator-sflow" doc:id="9161bd6e-d28a-4d33-8f03-48e115d87dce" name="validate-token-orchestrator-sflow"/>
+    </flow>
+    <flow name="post:\create-client:application\json:ida-auth-api-config">
+		<flow-ref doc:name="create-client-orchestrator-sflow" doc:id="56911026-5a6d-479e-98c9-56bf44a008ed" name="create-client-orchestrator-sflow"/>
+    </flow>
+</mule>

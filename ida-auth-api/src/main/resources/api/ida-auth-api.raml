@@ -1,0 +1,32 @@
+#%RAML 1.0
+title: ida-auth-api
+protocols:
+  - HTTP
+
+description: This API is going to work as OAuth2 provider for ida users.
+
+/create-client:
+  post:
+      description: Creates a client based on the user
+      displayName: Create client
+      body:
+        application/json:
+          example: !include examples/requests/create-client-request.json
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/responses/success-response.json
+
+/validate-token:
+  get:
+    description: Validates Bearer Token
+    displayName: Validate access token
+    headers:
+      Authorization: string
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/responses/validate-token.json
+      

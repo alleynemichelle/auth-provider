@@ -1,0 +1,14 @@
+https:
+  host: "localhost"
+  port: "8095"
+  key:  "${secure::https.key}"
+
+
+http:
+  host: "0.0.0.0"
+  port: "8087"
+
+
+token:
+  path: "/token"
+  ttl: "30"

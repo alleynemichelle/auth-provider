@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:oauth2-provider="http://www.mulesoft.org/schema/mule/oauth2-provider"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/schema/mule/oauth2-provider/current/mule-oauth2-provider.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="76cf3e1b-3c8f-4273-a86e-389187cfca28" file="properties/${env}/app-properties.yaml" />
+	<os:object-store name="client_os" doc:name="Object store" doc:id="61c33345-05cd-4da6-b7af-15ee00be7eb4" />
+	<os:object-store name="token_os" doc:name="Object store" doc:id="6756ec0f-6d49-43ae-983d-ac4718a0fc99" />
+	<oauth2-provider:config name="OAuth2_Provider_Config" doc:name="OAuth2 Provider Config" doc:id="96f27c96-70b4-41df-b8d3-38aba831bc66" listenerConfig="ida-auth-api-httpListenerConfig" clientStore="client_os" supportedGrantTypes="CLIENT_CREDENTIALS" >
+		<oauth2-provider:token-config tokenStore="token_os" tokenTtl="${token.ttl}" tokenTtlTimeUnit="MINUTES" path="${token.path}"/>
+	</oauth2-provider:config>
+		<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="a784a535-95e7-4957-a7f4-b5f1c6e4263d" file="properties/${env}/secure-properties.yaml" key="${secure.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<global-property doc:name="Global Property" doc:id="d013ad80-bcf7-44d7-88de-1b9f16aeffe4" name="env" value="${env}" />
+ <http:listener-config name="ida-auth-api-httpListenerConfig">
+        <http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS"> 
+          	<tls:context >
+				<tls:key-store path="tls/digital-contact-center-keystore.jks" alias="mule" keyPassword="${https.key}" password="${https.key}" type="jks"/>
+			</tls:context>
+        </http:listener-connection>
+        <http:listener-interceptors>
+        <http:cors-interceptor allowCredentials="true">
+           <http:origins>
+           		<http:public-resource/>
+       	    </http:origins>
+        </http:cors-interceptor>
+    </http:listener-interceptors>
+    </http:listener-config>
+    <apikit:config name="ida-auth-api-config" api="ida-auth-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+</mule>

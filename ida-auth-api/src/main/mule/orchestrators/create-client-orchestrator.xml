@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:oauth2-provider="http://www.mulesoft.org/schema/mule/oauth2-provider" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/schema/mule/oauth2-provider/current/mule-oauth2-provider.xsd">
+	<sub-flow name="create-client-orchestrator-sflow" doc:id="2d76a4be-dc44-4d88-8fd8-9048c99c4380" >
+		<oauth2-provider:create-client doc:name="Create client" doc:id="798aecd5-5e7e-4366-adf9-dcad68477494" config-ref="OAuth2_Provider_Config" clientId="#[payload.client_id]" type="CONFIDENTIAL" clientName="#[payload.client_name]" authorizedGrantTypes='#[["CLIENT_CREDENTIALS"]]' failIfPresent="true" secret="#[payload.client_secret]"/>
+		<flow-ref doc:name="success-response" doc:id="a852ef62-bc2f-4574-a39c-350bce2eb199" name="success-response"/>
+	</sub-flow>
+</mule>

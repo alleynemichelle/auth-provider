@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	
+	<sub-flow name="set-error-payload" doc:id="d64e25a9-fd23-4459-8a6c-c22f1a7daaf1">
+		<ee:transform doc:name="Error message" doc:id="f55f1cdd-d895-4590-86c7-2595ef0dd64a" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    status: "Error",
+    cid: correlationId,
+    code: vars.httpStatus as String,
+    timestamp: now() as LocalDateTime ++ "Z",
+    data: [],
+    error: [
+        {
+            error_message: vars.errorMessage,
+            error_description: error.detailedDescription
+        }
+    ]
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+	</sub-flow>
+	<error-handler name="api-kit-error-handler" doc:id="327278cd-5b30-42b7-9a28-f73480444f05">
+	        <on-error-propagate type="APIKIT:BAD_REQUEST">
+			<ee:transform doc:name="Set error variables" doc:id="c7359885-4e3d-4e99-982f-9597b9bd5aad" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA["Bad request"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="981f6935-a1bc-4e71-9cef-3fea8a739055" name="set-error-payload" />
+		
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Set error variables" doc:id="8271e860-e4e1-4858-90ab-1207873b459f" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage"><![CDATA["Resource not found"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="1312c152-61c2-4f60-bdce-116077402ae5" name="set-error-payload" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+			<ee:transform doc:name="Set error variables" doc:id="a002d207-a715-438b-b214-3399adc2ccc0" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+				<ee:message />
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[405]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA["Method not allowed"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="90986c9a-f595-4490-991b-4cca3548bad0" name="set-error-payload" />
+            </on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Set error variables" doc:id="cb06c6cb-6716-4fc1-b353-703ba7eee056" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage"><![CDATA["Not acceptable"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="88518f51-73f5-40aa-9dcc-22c348452d49" name="set-error-payload" />
+            </on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+			<ee:transform doc:name="Set error variables" doc:id="4c225b72-1630-4d9d-95c0-555fc9400d07" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage"><![CDATA["Not Implemented"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="3a974b9e-9a38-421d-9e99-2bde7e6cc143" name="set-error-payload" />
+            </on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ef54ef03-b289-437e-92c8-dcc9bdc2ecba" type="OAUTH2-PROVIDER:TOKEN_UNAUTHORIZED">
+			<ee:transform doc:name="Set error variables" doc:id="321acd17-fd1f-4a90-93a5-833541dfb81e" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[401]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage"><![CDATA["Invalid token"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="0572bc8b-41bc-4c77-9d3f-5c3e2fd79306" name="set-error-payload" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5480dfca-03b7-4973-a0b6-4e6cea6cc216" type="OAUTH2-PROVIDER:CLIENT_ALREADY_EXISTS" >
+			<ee:transform doc:name="Set error variables" doc:id="88b5a3bb-c5d3-419e-8ae6-f48f1a647158" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+				<ee:message />
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA["Client already exists"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="28c56dc6-c0ac-4af3-8959-cdd43a9c6860" name="set-error-payload" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="44479739-f6f0-4deb-a343-9a097f1ae822" type="ANY">
+			<ee:transform doc:name="Set error variables" doc:id="91f1ed29-c95e-4334-8e34-1c031cb47271" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[401]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage"><![CDATA["Not Implemented"
+]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="set-error-payload" doc:id="2900ef12-dafd-408e-9e7f-0b1b68ed5af6" name="set-error-payload" />
+		</on-error-propagate>
+       
+	</error-handler>
+	
+
+</mule>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:oauth2-provider="http://www.mulesoft.org/schema/mule/oauth2-provider"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/schema/mule/oauth2-provider/current/mule-oauth2-provider.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="validate-token-orchestrator-sflow" doc:id="3c24bbd9-780c-4ba4-b595-a45d5cc2db2f" >
+		<oauth2-provider:validate-token doc:name="Validate token" doc:id="9a01b7ed-5066-49e4-8da3-7e43ab26f9e9" config-ref="OAuth2_Provider_Config"/>
+		<ee:transform doc:name="Set response" doc:id="1893f85c-6ed0-4bc4-8d93-2dad21324874" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"expires_in": payload.expires_in,
+	"expired": if (payload.expires_in > 0) false else true
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="success-response" doc:id="f5291708-a22c-4e3e-baaf-6eeda322f8ea" name="success-response"/>
+	</sub-flow>
+</mule>
